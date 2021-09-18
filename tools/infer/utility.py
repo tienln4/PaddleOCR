@@ -70,10 +70,7 @@ def init_args():
     parser.add_argument("--rec_char_type", type=str, default='ch')
     parser.add_argument("--rec_batch_num", type=int, default=6)
     parser.add_argument("--max_text_length", type=int, default=25)
-    parser.add_argument(
-        "--rec_char_dict_path",
-        type=str,
-        default="./ppocr/utils/ppocr_keys_v1.txt")
+    parser.add_argument("--rec_char_dict_path", type=str, default="./benchmark/configs/vn_dict.txt")
     parser.add_argument("--use_space_char", type=str2bool, default=True)
     parser.add_argument(
         "--vis_font_path", type=str, default="./doc/fonts/simfang.ttf")

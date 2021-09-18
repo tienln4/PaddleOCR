@@ -16,6 +16,8 @@ __all__ = ["build_backbone"]
 
 
 def build_backbone(config, model_type):
+    print("build_backbone")
+    print(model_type)
     if model_type == "det":
         from .det_mobilenet_v3 import MobileNetV3
         from .det_resnet_vd import ResNet

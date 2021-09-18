@@ -9,7 +9,7 @@ __pycache__/
 
 inference/
 inference_results/
-output/
+# output/
 
 *.DS_Store
 *.vs
@@ -29,3 +29,23 @@ paddleocr.egg-info/
 /deploy/android_demo/app/PaddleLite/
 /deploy/android_demo/app/.cxx/
 /deploy/android_demo/app/cache/
+model
+DB_data
+DAT
+benchmark/v1
+benchmark/v2
+benchmark/v3
+benchmark/X
+benchmark/results
+deploy/tensorrt/v2
+deploy/tensorrt/v3
+deploy/tensorrt/X
+deploy/tensorrt/valid
+deploy/tensorrt/test_plate
+deploy/tensorrt/images
+deploy/tensorrt/crnn.pytorch
+output
+images/img
+benchmark
+images
+deploy/tensorrt/*.jpg

@@ -102,7 +102,7 @@ class TextRecognizer(object):
         resized_image -= 0.5
         resized_image /= 0.5
         padding_im = np.zeros((imgC, imgH, imgW), dtype=np.float32)
-        padding_im[:, :, 0:resized_w] = resized_image
+        padding_im[:, :, 0:resized_w] = resized_image  
         return padding_im
 
     def resize_norm_img_srn(self, img, image_shape):
@@ -188,6 +188,7 @@ class TextRecognizer(object):
         rec_res = [['', 0.0]] * img_num
         batch_num = self.rec_batch_num
         st = time.time()
+        inference_time = 0
         if self.benchmark:
             self.autolog.times.start()
         for beg_img_no in range(0, img_num, batch_num):
@@ -251,7 +252,9 @@ class TextRecognizer(object):
                 preds = {"predict": outputs[2]}
             else:
                 self.input_tensor.copy_from_cpu(norm_img_batch)
+                st = time.time()
                 self.predictor.run()
+                inference_time = time.time() - st
 
                 outputs = []
                 for output_tensor in self.output_tensors:
@@ -265,7 +268,7 @@ class TextRecognizer(object):
                 rec_res[indices[beg_img_no + rno]] = rec_result[rno]
             if self.benchmark:
                 self.autolog.times.end(stamp=True)
-        return rec_res, time.time() - st
+        return rec_res, inference_time
 
 
 def main(args):

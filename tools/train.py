@@ -81,6 +81,7 @@ def main(config, device, logger, vdl_writer):
             config['Architecture']["Head"]['out_channels'] = char_num
 
     model = build_model(config['Architecture'])
+    print(model)
     if config['Global']['distributed']:
         model = paddle.DataParallel(model)
 
