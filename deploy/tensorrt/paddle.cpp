@@ -62,134 +62,133 @@ void doInference(IExecutionContext& context, cudaStream_t& stream, void **buffer
 }
 
 int main(int argc, char** argv) {
-    // cudaSetDevice(DEVICE);
-    // char *trtModelStream{nullptr};
-    // size_t size{0};
+    std::ofstream result_file;
+    result_file.open ("v2_tensorrt.txt", std::ios_base::app);
+    // read_file << "write file\n";
+    // read_file << "\n";
+    cudaSetDevice(DEVICE);
+    char *trtModelStream{nullptr};
+    size_t size{0};
 
-    // std::ifstream file("/paddle/model/paddle.engine", std::ios::binary);
-    // if (file.good()) 
-    // {
-    //     file.seekg(0, file.end);
-    //     size = file.tellg();
-    //     file.seekg(0, file.beg);
-    //     trtModelStream = new char[size];
-    //     assert(trtModelStream);
-    //     file.read(trtModelStream, size);
-    //     file.close();
-    // }
+    std::ifstream file("/paddle/model/paddle.engine", std::ios::binary);
+    if (file.good()) 
+    {
+        file.seekg(0, file.end);
+        size = file.tellg();
+        file.seekg(0, file.beg);
+        trtModelStream = new char[size];
+        assert(trtModelStream);
+        file.read(trtModelStream, size);
+        file.close();
+    }
 
-    // // prepare input data ---------------------------
+    // prepare input data ---------------------------
     
-    // IRuntime* runtime = createInferRuntime(gLogger);
-    // assert(runtime != nullptr);
-    // ICudaEngine* engine = runtime->deserializeCudaEngine(trtModelStream, size);
-    // assert(engine != nullptr);
-    // IExecutionContext* context = engine->createExecutionContext();
-    // assert(context != nullptr);
-    // delete[] trtModelStream;
-    // assert(engine->getNbBindings() == 2);
-    // void* buffers[2];
+    IRuntime* runtime = createInferRuntime(gLogger);
+    assert(runtime != nullptr);
+    ICudaEngine* engine = runtime->deserializeCudaEngine(trtModelStream, size);
+    assert(engine != nullptr);
+    IExecutionContext* context = engine->createExecutionContext();
+    assert(context != nullptr);
+    delete[] trtModelStream;
+    assert(engine->getNbBindings() == 2);
+    void* buffers[2];
 
-    // const int inputIndex = engine->getBindingIndex(INPUT_BLOB_NAME);
-    // const int outputIndex = engine->getBindingIndex(OUTPUT_BLOB_NAME);
-    // assert(inputIndex == 0);
-    // assert(outputIndex == 1);
-    // // Create GPU buffers on device
-    // CHECK(cudaMalloc(&buffers[inputIndex], BATCH_SIZE * 3 * INPUT_H * INPUT_W * sizeof(float)));
-    // CHECK(cudaMalloc(&buffers[outputIndex], BATCH_SIZE * OUTPUT_SIZE * sizeof(float)));
-    // // Create stream
-    // cudaStream_t stream;
-    // CHECK(cudaStreamCreate(&stream));
+    const int inputIndex = engine->getBindingIndex(INPUT_BLOB_NAME);
+    const int outputIndex = engine->getBindingIndex(OUTPUT_BLOB_NAME);
+    assert(inputIndex == 0);
+    assert(outputIndex == 1);
+    // Create GPU buffers on device
+    CHECK(cudaMalloc(&buffers[inputIndex], BATCH_SIZE * 3 * INPUT_H * INPUT_W * sizeof(float)));
+    CHECK(cudaMalloc(&buffers[outputIndex], BATCH_SIZE * OUTPUT_SIZE * sizeof(float)));
+    // Create stream
+    cudaStream_t stream;
+    CHECK(cudaStreamCreate(&stream));
+
+    std::string data_dir = "/paddle/v2/";
+    std::string gt_path = data_dir + "gt.txt";
+    std::ifstream read_file;
+    read_file.open (gt_path);
+    std::string text;
+    int num_file = 0;
+    while (getline (read_file, text)) 
+    {
+        static float data[BATCH_SIZE * 3 * INPUT_H * INPUT_W];
+        static float prob[BATCH_SIZE * OUTPUT_SIZE];
+        num_file ++;
+        int colum = 0;
+        std::string colum_val = "";
+        std::string img_path = "";
+        std::string gt = "";
+
+        for (int i = 0; i <= text.length(); i++)
+        {
+            if (text[i] == '\t' || i == text.length())
+            {
+                colum ++;
+                if (colum == 1) img_path = colum_val;
+                else gt = colum_val;
+                colum_val = "";
+            }
+            else
+            {
+                colum_val = colum_val + text[i];
+            }
+        }
+        img_path = data_dir + img_path;
+        // std::cout<< img_path << std::endl;
 
 
-    // std::string data_dir = "/paddle/v3/";
-    // std::string gt_path = data_dir + "gt.txt";
-    // std::ifstream read_file;
-    // read_file.open (gt_path);
-    // std::string text;
-    // int num_file = 0;
-    // while (getline (read_file, text)) 
-    // {
-    //     static float data[BATCH_SIZE * 3 * INPUT_H * INPUT_W];
-    //     static float prob[BATCH_SIZE * OUTPUT_SIZE];
-    //     num_file ++;
-    //     int colum = 0;
-    //     std::string colum_val = "";
-    //     std::string img_path = "";
-    //     std::string gt = "";
+        cv::Mat img = cv::imread(img_path);
+        // cv::Mat img = cv::imread("/paddle/images/08.jpg");
+        if (img.empty()) {
+            std::cerr << "demo.png not found !!!" << std::endl;
+            return -1;
+        }
+        cv::resize(img, img, cv::Size(INPUT_W, INPUT_H));
+        int i = 0;
+        for (int row = 0; row < INPUT_H; ++row) {
+            uchar* uc_pixel = img.data + row * img.step;
+            for (int col = 0; col < INPUT_W; ++col) {
+                data[i] = (uc_pixel[2] / 255.0-0.5)/0.5;
+                data[i + INPUT_H * INPUT_W] = (uc_pixel[1] / 255.0-0.5)/0.5;
+                data[i + 2 * INPUT_H * INPUT_W] = (uc_pixel[0] / 255.0-0.5)/0.5;
+                uc_pixel += 3;
+                ++i;
+            }
+        }
 
-    //     for (int i = 0; i <= text.length(); i++)
-    //     {
-    //         if (text[i] == '\t' || i == text.length())
-    //         {
-    //             colum ++;
-    //             if (colum == 1) img_path = colum_val;
-    //             else gt = colum_val;
-    //             colum_val = "";
-    //         }
-    //         else
-    //         {
-    //             colum_val = colum_val + text[i];
-    //         }
-    //     }
-    //     img_path = data_dir + img_path;
-    //     // std::cout<< img_path << std::endl;
+        // Run inference
+        auto start = std::chrono::system_clock::now();
+        doInference(*context, stream, buffers, data, prob, BATCH_SIZE);
+        auto end = std::chrono::system_clock::now();
+        // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
 
+        std::vector<int> preds;
+        for (int i = 0; i < 25; i++) {
+            int maxj = 0;
+            for (int j = 1; j < 38; j++) {
+                if (prob[38 * i + j] > prob[38 * i + maxj]) maxj = j;
+            }
+            preds.push_back(maxj);
+        }
+        // std::cout << "sim: " << strDecode(preds, false) << std::endl;
+        std::string result = "false";
+        float time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        if (strDecode(preds, false) == gt)
+        {
+            result = "true";
+        }
+        std::cout << "pred: " << strDecode(preds, false)<< "      " << "gt: " << gt<< "       " << result << "     " << time <<std::endl;
+        result_file << strDecode(preds, false) <<"\n";
 
-    //     cv::Mat img = cv::imread(img_path);
-    //     // cv::Mat img = cv::imread("/paddle/images/08.jpg");
-    //     if (img.empty()) {
-    //         std::cerr << "demo.png not found !!!" << std::endl;
-    //         return -1;
-    //     }
-    //     cv::resize(img, img, cv::Size(INPUT_W, INPUT_H));
-    //     int i = 0;
-    //     for (int row = 0; row < INPUT_H; ++row) {
-    //         uchar* uc_pixel = img.data + row * img.step;
-    //         for (int col = 0; col < INPUT_W; ++col) {
-    //             data[i] = (uc_pixel[2] / 255.0-0.5)/0.5;
-    //             data[i + INPUT_H * INPUT_W] = (uc_pixel[1] / 255.0-0.5)/0.5;
-    //             data[i + 2 * INPUT_H * INPUT_W] = (uc_pixel[0] / 255.0-0.5)/0.5;
-    //             uc_pixel += 3;
-    //             ++i;
-    //         }
-    //     }
+    }
 
-    //     // Run inference
-    //     auto start = std::chrono::system_clock::now();
-    //     doInference(*context, stream, buffers, data, prob, BATCH_SIZE);
-    //     auto end = std::chrono::system_clock::now();
-    //     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
-
-    //     std::vector<int> preds;
-    //     for (int i = 0; i < 25; i++) {
-    //         int maxj = 0;
-    //         for (int j = 1; j < 38; j++) {
-    //             if (prob[38 * i + j] > prob[38 * i + maxj]) maxj = j;
-    //         }
-    //         preds.push_back(maxj);
-    //     }
-    //     // std::cout << "sim: " << strDecode(preds, false) << std::endl;
-    //     std::string result = "false";
-    //     float time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    //     if (strDecode(preds, false) == gt)
-    //     {
-    //         result = "true";
-    //     }
-    //     std::cout << "pred: " << strDecode(preds, false)<< "      " << "gt: " << gt<< "       " << result << "     " << time <<std::endl;
-
-    // }
-
-    // cudaStreamDestroy(stream);
-    // CHECK(cudaFree(buffers[inputIndex]));
-    // CHECK(cudaFree(buffers[outputIndex]));
-    // // Destroy the engine
-    // context->destroy();
-    // engine->destroy();
-    // runtime->destroy();
-    std::ofstream read_file;
-    read_file.open ("../filename.txt",  std::ios_base::app);
-    read_file << "write file\n";
-    read_file << "\n";
+    cudaStreamDestroy(stream);
+    CHECK(cudaFree(buffers[inputIndex]));
+    CHECK(cudaFree(buffers[outputIndex]));
+    context->destroy();
+    engine->destroy();
+    runtime->destroy();
     return 0;
 }

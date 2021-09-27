@@ -7,7 +7,7 @@
 
 python3.8 tools/infer/predict_rec.py \
         --image_dir="benchmark/X/images" \
-        --rec_model_dir="./model/plate/rec/" \
+        --rec_model_dir="./model/plate/rec_khanhtq" \
         --use_gpu=true \
         --warmup=false
 

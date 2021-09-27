@@ -46,6 +46,5 @@ deploy/tensorrt/images
 deploy/tensorrt/crnn.pytorch
 output
 images/img
-benchmark
 images
 deploy/tensorrt/*.jpg

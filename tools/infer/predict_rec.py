@@ -268,6 +268,8 @@ class TextRecognizer(object):
                 rec_res[indices[beg_img_no + rno]] = rec_result[rno]
             if self.benchmark:
                 self.autolog.times.end(stamp=True)
+
+            print(inference_time)
         return rec_res, inference_time
 
 

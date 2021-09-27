@@ -1,0 +1,21 @@
+
+global:
+  use_gpu: true
+  use_tensorrt: false
+  gpu_mem: 2048
+  enable_mkldnn: false
+
+recognizer:
+  rec_algorithm: CRNN
+  rec_model_dir: ./model/plate/rec_khanhtq
+  rec_image_shape: 3,32,100
+  rec_char_type: ch
+  rec_batch_num: 32
+  rec_char_dict_path: ./benchmark/configs/vn_dict.txt
+  use_space_char: true
+  use_zero_copy_run: true
+benchmark:
+  benchmark: false
+  dataset: benchmark/v2
+  result: ./benchmark/results
+
