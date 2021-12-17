@@ -73,55 +73,6 @@ class Benchmark:
                 result_line = f"{img_fp} {img_gt} {cpp_results[i][0]} {cpp_results[i][1]}\n"
                 result.write(result_line)
 
-    def MergeBenchmarkResults(self, python_record, deepstream_record, tensorrt_record):
-        merge_result_file = open(os.path.join(self.config.result, "merged_result.txt"), "a")
-        merge_result_view_file = open(os.path.join(self.config.result, "merged_result_view.txt"), "a")
-        python_file = open(python_record)
-        deepstream_file = open(deepstream_record)
-        tensorrt_file = open(tensorrt_record)
-
-        deepstream_pred_list = []
-        tensorrt_pred_list = []
-
-        for line in deepstream_file:
-            deepstream_pred_list.append(line[:-1])
-        
-        for line in tensorrt_file:
-            tensorrt_pred_list.append(line[:-1])
-
-        
-        for i, line in enumerate(python_file):
-            line = line.split(" ")
-            if deepstream_pred_list[i]==line[1]: ds_result = "True" 
-            else: ds_result = "False"
-            if tensorrt_pred_list[i]==line[1]: trt_result = "True" 
-            else: trt_result = "False"
-
-            new_line = f"{line[0]} {line[1]} {line[2]} {line[3]} {line[4]} {line[5]} {deepstream_pred_list[i]} {ds_result} {tensorrt_pred_list[i]} {trt_result} \n"
-            view_line =  f'{line[0]:40s} | {line[1]:10s} | {line[2]:10} | {line[3]:5s} | {line[4]:20s} | {line[5]:20s} | {deepstream_pred_list[i]:10s} | {ds_result:5s} | {tensorrt_pred_list[i]:10s} | {trt_result:5s}|\n'
-            merge_result_view_file.write(view_line)
-            merge_result_file.write(new_line)
-
-    def ExportResult(self, record_path):
-        result_file = open(record_path)
-        result = []
-
-        
-        for i,line in enumerate(result_file):
-            if i > 0:
-                line = line.split(" ")
-                result.append([self.check(line[3]), self.check(line[7]), self.check(line[9])])
-        result = np.array(result)
-        print("Paddle: ", sum(result[:,0])/len(result[:,0]))
-        print("Deepstream: ", sum(result[:,1])/len(result[:,0]))
-        print("Tensorrt: ", sum(result[:,2])/len(result[:,0]))
-
-        #         time = time + float(line[5])
-        #         if line[3] == "True": true_plate += 1
-        #         else : false_plate += 1
-        # print(true_plate/(true_plate+false_plate))
-        # print(time/347)
-
     def CalculateAccuracy(self, record_path):
         result_file = open(record_path)
         result = []

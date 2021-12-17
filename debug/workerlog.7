@@ -1,0 +1,11 @@
+grep: warning: GREP_OPTIONS is deprecated; please use an alias or script
+Traceback (most recent call last):
+  File "tools/train.py", line 32, in <module>
+    from ppocr.data import build_dataloader
+  File "/paddle/ppocr/data/__init__.py", line 34, in <module>
+    from ppocr.data.imaug import transform, create_operators
+  File "/paddle/ppocr/data/imaug/__init__.py", line 19, in <module>
+    from .iaa_augment import IaaAugment
+  File "/paddle/ppocr/data/imaug/iaa_augment.py", line 20, in <module>
+    import imgaug
+ImportError: No module named 'imgaug'

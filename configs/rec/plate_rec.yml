@@ -3,8 +3,8 @@ Global:
   epoch_num: 500
   log_smooth_window: 20
   print_batch_step: 10
-  save_model_dir: ./output/plate_rec_132x100
-  save_epoch_step: 10
+  save_model_dir: ./output/plate_rec_3x32x100
+  save_epoch_step: 1
   # evaluation is run every 5000 iterations after the 4000th iteration
   eval_batch_step: [0, 2000]
   cal_metric_during_train: True
@@ -16,7 +16,7 @@ Global:
   # for data or label process
   character_dict_path: ppocr/utils/vn_dict.txt
   character_type: ch
-  max_text_length: 25
+  max_text_length: 10
   infer_mode: False
   use_space_char: True
   save_res_path: ./output/rec/plate_rec.txt
@@ -61,8 +61,8 @@ Metric:
 Train:
   dataset:
     name: SimpleDataSet
-    data_dir: ./DAT
-    label_file_list: ["./DAT/train.txt"]
+    data_dir: ./benchmark/v1/train
+    label_file_list: ["./benchmark/v1/train/gt.txt"]
     transforms:
       - DecodeImage: # load image
           img_mode: BGR
@@ -82,8 +82,8 @@ Train:
 Eval:
   dataset:
     name: SimpleDataSet
-    data_dir: ./DAT
-    label_file_list: ["./DAT/test.txt"]
+    data_dir: ./benchmark/v1/valid
+    label_file_list: ["./benchmark/v1/valid/gt.txt"]
     transforms:
       - DecodeImage: # load image
           img_mode: BGR

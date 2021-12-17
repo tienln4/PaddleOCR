@@ -6,13 +6,13 @@
 #     --use_gpu=true
 
 python3.8 tools/infer/predict_rec.py \
-        --image_dir="benchmark/X/images" \
+        --image_dir="test_.jpg" \
         --rec_model_dir="./model/plate/rec_khanhtq" \
-        --use_gpu=true \
+        --use_gpu=false \
         --warmup=false
 
 # python3.8 tools/infer/predict_det.py \
-#         --image_dir="./images/img/14c0520858ad41139638f5766b796e0e.jpg"  \
+#         --image_dir="./20201213_081633"  \
 #         --det_model_dir="./model/server/det/"\
 #         --use_gpu=true
 
